@@ -24,11 +24,15 @@ This code enables chatgpt. Arguments are...
 - Whether split vertical or not
 
 Default way of split is horizontal.
-
 ```vim
-let s:vertical = 1
-call NincoEnable('[API_KEY]', 'gpt-3.5-turbo', s:vertical)
+call NincoEnableWindow([API_KEY], 'gpt-3.5-turbo', 0)
 ```
+
+If you do not want to split window, call it.
+```vim
+call NincoEnable('[API_KEY]', 'gpt-3.5-turbo')
+```
+
 
 # Model setting
 If you want to change model after enabling ninco, NincoSetModel may be useful.
@@ -61,7 +65,8 @@ let g:gpt_model = 'gpt-3.5-turbo'
 let g:api_key = "[Your API key]"
 call NincoEnableFunctions()
 
-nnoremap <leader>c :call NincoEnable(g:api_key, g:gpt_model, 0)<CR>
+nnoremap <leader>d :call NincoEnableWindow(g:api_key, g:gpt_model, 0)<CR>
+nnoremap <leader>c :call NincoEnable(g:api_key, g:gpt_model)<CR>
 nnoremap gn :call NincoSingle("")<left><left>
 vnoremap gn :<BS><BS><BS><BS><BS>call NincoSingleVisual("")<left><left>
 nnoremap gm :call NincoPut("")
