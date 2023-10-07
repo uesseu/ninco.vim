@@ -12,6 +12,7 @@ However, I use it in daily life and it is useful for me. It can...
 - Ask a question of selected lines
 - Talk with chatgpt, compressing old data
 
+![](sample.gif)
 
 # Requirements
 Vim or neovim, Denops and API key of openai is also needed.
@@ -43,8 +44,8 @@ call NincoSetModel('gpt-3.5-turbo')
 
 # Preset of functions
 Since it is simple script, lowlevel usage is not very useful.
-However, you may want to use all by your self.
 And so, you can call a function to setup functions optionally.
+This may be good to use in daily life.
 
 This function enables optional functions.
 ```vim
@@ -54,9 +55,12 @@ This function enables functions below.
 
 # Example of configure
 This vim script is part of my vimrc.
-If you want to use chatgpt, and open new window and enable chatgpt by pushing "\c".
+You can open a new window and enable chatgpt by pushing "\d".
+If you do not want a new window, push "\d".
 Then, push "gn" and use the prompt without remembering talk log.
+This is the cheap way. I use it frequently and pay 0.05 dollar a day.
 Push "gm" and use the prompt if you want talk log.
+This is the expensive way.
 If you want to compress talk log, call NinCompress.
 
 ```vim
