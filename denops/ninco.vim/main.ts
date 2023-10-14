@@ -119,19 +119,20 @@ class Order{
 function putString(denops: Denops, text: string){
   let num = 0
   denops.eval("g:ninco#winid").then(x => {
-  if (x == '-1'){
-    text.split("\n").map(d =>{
-      if(num !== 0) execute(denops, `norm o`)
-      execute(denops, `call NinPutWindow('${d}')`)
-      num++
-    })
-  }
-  else{
-    text.split("\n").map(d =>{
-      if(num !== 0) execute(denops, `call win_execute(g:ninco#winid, 'norm o')`)
-      execute(denops, `call NinPutWindow('${d}')`)
-      num++
-    })}
+    if (x == '-1'){
+      text.split("\n").map(d =>{
+	if(num !== 0) execute(denops, `norm o`)
+	execute(denops, `call NinPutWindow('${d}')`)
+	num++
+      })
+    }
+    else{
+      text.split("\n").map(d =>{
+	if(num !== 0) execute(denops, `call win_execute(g:ninco#winid, 'norm o')`)
+	execute(denops, `call NinPutWindow('${d}')`)
+	num++
+      })
+    }
   })
 }
 

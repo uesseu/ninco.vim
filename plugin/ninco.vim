@@ -54,9 +54,10 @@ function! NinPutWindow(args) abort
     call setline(cur_line, getline(cur_line) . a:args)
     call execute('norm $')
   else
+    call win_execute(g:ninco#winid, 'norm G')
     let hist = getbufline(g:async_cmd_win, '$')
     let s:argstr = hist[-1] . a:args
-    call setbufline(g:async_cmd_win, line('.', bufwinid(g:async_cmd_win)),  s:argstr)
+    call setbufline(g:async_cmd_win, line('$', bufwinid(g:async_cmd_win)),  s:argstr)
     call win_execute(g:ninco#winid, 'norm $')
   endif
 endfunction
@@ -79,10 +80,10 @@ function! NincoEnableFunctions()
   endfunction
 
   function! NincoSingleVisual(order)
-    call setpos('.', [0, getpos("'>")[1], 0, 0])
-    norm o
     if g:ninco#winid != -1
       call NinPutWindow("# " . a:order)
+    else
+      call setpos('.', [0, getpos("'>")[1], 0, 0])
     endif
     call NincoPutEnter()
     call denops#request('ninco.vim', 'single', [a:order . "\n" . GetVisualSelection()])
@@ -98,7 +99,6 @@ function! NincoEnableFunctions()
 
   function! NincoPutVisual(order)
     call setpos('.', [0, getpos("'>")[1], 0, 0])
-    norm o
     if g:ninco#winid != -1
       call NinPutWindow("# " . a:order)
     endif
