@@ -122,14 +122,14 @@ function putString(denops: Denops, text: string){
     if (x == '-1'){
       text.split("\n").map(d =>{
 	if(num !== 0) execute(denops, `norm o`)
-	execute(denops, `call NinPutWindow('${d}')`)
+	execute(denops, `call NinPutWindow("${d.replace(`\"`, `\\"`)}")`)
 	num++
       })
     }
     else{
       text.split("\n").map(d =>{
 	if(num !== 0) execute(denops, `call win_execute(g:ninco#winid, 'norm o')`)
-	execute(denops, `call NinPutWindow('${d}')`)
+	execute(denops, `call NinPutWindow("${d.replace(`\"`, `\\"`)}")`)
 	num++
       })
     }
