@@ -122,14 +122,14 @@ function putString(denops: Denops, text: string){
     if (x == '-1'){
       text.split("\n").map(d =>{
 	if(num !== 0) execute(denops, `norm o`)
-	execute(denops, `call NinPutWindow('${d}')`)
+	execute(denops, `call NinPutWindow("${d.replace(`\"`, `\\"`)}")`)
 	num++
       })
     }
     else{
       text.split("\n").map(d =>{
 	if(num !== 0) execute(denops, `call win_execute(g:ninco#winid, 'norm o')`)
-	execute(denops, `call NinPutWindow('${d}')`)
+	execute(denops, `call NinPutWindow("${d.replace(`\"`, `\\"`)}")`)
 	num++
       })
     }
@@ -192,7 +192,7 @@ export async function main(denops: Denops): Promise<void> {
         .then(x => execute(denops, `call NincoPutEnter()`))
     },
 
-    async compress(num, order): Promise<void>{
+    async compress(order): Promise<void>{
       putString(denops, "# Compress[" + order + "]")
       execute(denops, `call NincoPutEnter()`)
       const history: object = {"role": "user",
@@ -211,6 +211,10 @@ export async function main(denops: Denops): Promise<void> {
     async putSystem(order: string): Promise<void>{
       globalOrder.putSystem(order)
     },
+
+    async printLog(): Promise<void>{
+      console.log(globalOrder.messages)
+    }
 
   };
 };
