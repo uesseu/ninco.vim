@@ -3,6 +3,9 @@ import { execute } from "https://deno.land/x/denops_std@v1.0.0/helper/mod.ts";
 
 let key = ""
 let globalModel = "gpt-3.5-turbo"
+let url = "https://api.openai.com/v1/chat/completions"
+//let url = "http://127.0.0.1:8000/v1/chat/completions"
+//let url = ''
 /**
  * A manager of order for chatGPT.
  * It can make JSON string to send to openai.
@@ -22,8 +25,8 @@ class Order{
     this.body = {
 	model: model,
 	messages: [],
-	stream: true
-      }
+	stream: true,
+    }
   }
 
   /**
@@ -83,7 +86,7 @@ class Order{
    */
   getLetter(){
     this.body['messages'] = this.system.concat(this.messages)
-    return fetch("https://api.openai.com/v1/chat/completions", {
+    return fetch(url, {
       method: "POST",
       headers: {
 	"Content-Type": "application/json",
@@ -150,6 +153,7 @@ async function chatgpt(denops: Denops, order: Order, print: bool = true){
     const data = new TextDecoder().decode(chunk)
       .split("\n\n")
       .map(x => {
+	      console.log(x)
         if (x.length === 0) return ""
         if (x.trim() === "data: [DONE]") return ""
         if (x[0] !== "[") {
@@ -169,9 +173,10 @@ let globalOrder = new Order()
 export async function main(denops: Denops): Promise<void> {
   denops.dispatcher = {
 
-    async init(apikey: string, model: string): Promise<void> {
+    async init(apikey: string, model: string, base_url: string): Promise<void> {
       key = apikey
       globalModel = model
+//      url = base_url
     },
 
     async setModel(model: string): Promise<void>{

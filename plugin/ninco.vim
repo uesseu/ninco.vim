@@ -9,6 +9,7 @@ if exists('g:loaded_ninco')
 endif
 let g:loaded_ninco = 1
 let g:ninco#winid = -1
+let g:ninco#single = 1
 
 let s:save_cpo = &cpo
 set cpo&vim
@@ -25,27 +26,56 @@ function! GetVisualSelection()
   return join(lines, "\n")
 endfunction
 
-function! NincoEnableWindow(key, model, vertical=0)
-  call denops#request("ninco.vim", "init", [a:key, a:model])
-  let g:ninco#winid = bufwinid(g:async_cmd_win)
+
+function! NincoEnableWindow(key, model, url="https://api.openai.com/v1/chat/completions", vertical=0)
+  call denops#request("ninco.vim", "init", [a:key, a:model, a:url])
+  let g:ninco#winid = bufwinid(g:ninco#async_cmd_win)
+  let g:async_cmd_win = g:ninco#async_cmd_win
   let result_pool = []
   if g:ninco#winid == -1
     if a:vertical == 1
-      execute 'vsplit '.g:async_cmd_win
+      execute 'vsplit '.g:ninco#async_cmd_win
     else
-      execute 'split '.g:async_cmd_win
+      execute 'split '.g:ninco#async_cmd_win
     endif
     setlocal buftype=nofile bufhidden=wipe noswapfile
     setlocal wrap nonumber signcolumn=no filetype=markdown
     call win_execute(g:ninco#winid, 'setlocal modifiable', 1)
     wincmd p
-    let g:ninco#winid = bufwinid(g:async_cmd_win)
+    let g:ninco#winid = bufwinid(g:ninco#async_cmd_win)
   endif
 endfunction
 
-function! NincoEnable(key, model)
-  call denops#request("ninco.vim", "init", [a:key, a:model])
+function! NincoEnable(key, model, url="https://api.openai.com/v1/chat/completions")
+  call denops#request("ninco.vim", "init", [a:key, a:model, a:url])
   let g:ninco#winid = -1
+endfunction
+
+function! Ninco(template = "", ...)
+  if a:template != ""
+    let s:order = join(readfile(a:template), "\n")
+    for word in a:000
+      let s:order = printf(s:order, word)
+    endfor
+  else
+    let s:order = join(a:000, "\n")
+  endif
+  if g:ninco#single == 1
+    if g:ninco#winid != -1
+      call NinPutWindow("# ")
+      for word in split(s:order, "\n")
+	call NinPutWindow(word)
+	call NincoPutEnter()
+      endfor
+      call NinPutWindow("--------------------")
+    endif
+  endif
+  call NincoPutEnter()
+  if g:ninco#single == 1
+    call denops#request('ninco.vim', 'single', [s:order])
+  else
+    call denops#request('ninco.vim', 'put', [s:order])
+  endif
 endfunction
 
 function! NinPutWindow(args) abort
@@ -55,21 +85,59 @@ function! NinPutWindow(args) abort
     call execute('norm $')
   else
     call win_execute(g:ninco#winid, 'norm G')
-    let hist = getbufline(g:async_cmd_win, '$')
+    let hist = getbufline(g:ninco#async_cmd_win, '$')
     let s:argstr = hist[-1] . a:args
-    call setbufline(g:async_cmd_win, line('$', bufwinid(g:async_cmd_win)),  s:argstr)
+    call setbufline(g:ninco#async_cmd_win, line('$', bufwinid(g:ninco#async_cmd_win)),  s:argstr)
     call win_execute(g:ninco#winid, 'norm $')
   endif
 endfunction
 
+function! NincoPutEnter()
+  if g:ninco#winid == -1
+    call execute('norm o')
+  else
+    call win_execute(g:ninco#winid, 'norm o')
+  endif
+endfunction
+
+function! NincoCompress(num)
+  if g:ninco#winid != -1
+    call NinPutWindow("### Compress ###")
+  endif
+  call NincoPutEnter()
+  call denops#request('ninco.vim', 'compress', [a:num, 'Please summaryze these messages.'])
+endfunction
+
+function! NincoResetSystem(order)
+  if g:ninco#winid != -1
+    call NinPutWindow("### ResetSystem ###")
+  endif
+  call NincoPutEnter()
+  call denops#request('ninco.vim', 'resetSystem', [a:order])
+endfunction
+
+function! NincoPutSystem(order)
+  if g:ninco#winid != -1
+    call NinPutWindow("# " . a:order)
+  endif
+  call NincoPutEnter()
+  call denops#request('ninco.vim', 'putSystem', [a:order])
+endfunction
+
+function! NincoReset()
+  if g:ninco#winid != -1
+    call NinPutWindow("### Reset ###")
+  endif
+  call NincoPutEnter()
+  call denops#request('ninco.vim', 'reset', [])
+endfunction
+
+function! NincoSetModel(model)
+  call denops#request('ninco.vim', 'setModel', [a:model])
+endfunction
+
 function! NincoEnableFunctions()
-  function! NincoPutEnter()
-    if g:ninco#winid == -1
-      call execute('norm o')
-    else
-      call win_execute(g:ninco#winid, 'norm o')
-    endif
-  endfunction
+  echo "This is old function and will be removed."
 
   function! NincoSingle(order)
     if g:ninco#winid != -1
@@ -106,41 +174,6 @@ function! NincoEnableFunctions()
     call denops#request('ninco.vim', 'put', [a:order . "\n" . GetVisualSelection()])
   endfunction
 
-  function! NincoResetSystem(order)
-    if g:ninco#winid != -1
-      call NinPutWindow("### ResetSystem ###")
-    endif
-    call NincoPutEnter()
-    call denops#request('ninco.vim', 'resetSystem', [a:order])
-  endfunction
-
-  function! NincoPutSystem(order)
-    if g:ninco#winid != -1
-      call NinPutWindow("# " . a:order)
-    endif
-    call NincoPutEnter()
-    call denops#request('ninco.vim', 'putSystem', [a:order])
-  endfunction
-
-  function! NincoReset()
-    if g:ninco#winid != -1
-      call NinPutWindow("### Reset ###")
-    endif
-    call NincoPutEnter()
-    call denops#request('ninco.vim', 'reset')
-  endfunction
-
-  function! NincoCompress(num)
-    if g:ninco#winid != -1
-      call NinPutWindow("### Compress ###")
-    endif
-    call NincoPutEnter()
-    call denops#request('ninco.vim', 'compress', [a:num, 'Please summaryze these messages.'])
-  endfunction
-
-  function! NincoSetModel(model)
-    call denops#request('ninco.vim', 'setModel', [a:model])
-  endfunction
 endfunction
 
 let &cpo = s:save_cpo
