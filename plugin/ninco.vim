@@ -10,6 +10,7 @@ endif
 let g:loaded_ninco = 1
 let g:ninco#winid = -1
 let g:ninco#single = 1
+let g:ninco#async_cmd_win = '__CHATGPT__'
 
 let s:save_cpo = &cpo
 set cpo&vim
@@ -138,6 +139,8 @@ endfunction
 
 function! NincoEnableFunctions()
   echo "This is old function and will be removed."
+  let g:ninco#async_cmd_win = g:async_cmd_win
+
 
   function! NincoSingle(order)
     if g:ninco#winid != -1
