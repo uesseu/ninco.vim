@@ -124,15 +124,17 @@ function putString(denops: Denops, text: string){
   denops.eval("g:ninco#winid").then(x => {
     if (x == '-1'){
       text.split("\n").map(d =>{
+	d = d.replace(`\"`, `\\"`)
 	if(num !== 0) execute(denops, `norm o`)
-	execute(denops, `call NinPutWindow("${d.replace(`\"`, `\\"`)}")`)
+	execute(denops, `call NinPutWindow("${d}")`)
 	num++
       })
     }
     else{
       text.split("\n").map(d =>{
+	d = d.replace(`\"`, `\\"`)
 	if(num !== 0) execute(denops, `call win_execute(g:ninco#winid, 'norm o')`)
-	execute(denops, `call NinPutWindow("${d.replace(`\"`, `\\"`)}")`)
+	execute(denops, `call NinPutWindow("${d}")`)
 	num++
       })
     }
@@ -153,9 +155,14 @@ async function chatgpt(denops: Denops, order: Order, print: bool = true){
     const data = new TextDecoder().decode(chunk)
       .split("\n\n")
       .map(x => {
-	      console.log(x)
+	console.log(x)
+        console.log(x.trim().slice(5, 10))
         if (x.length === 0) return ""
         if (x.trim() === "data: [DONE]") return ""
+        if (x.trim().slice(5, 10) === "error") {
+	  return JSON.parse(x)["error"]["message"]
+	}
+        if (x.trim().slice(0, 8) === ": ping -") return ""
         if (x[0] !== "[") {
 	  return Array(JSON.parse(x.trim().slice(5))).filter(x => x !== "")
             .map(x => x["choices"][0]["delta"]["content"]).join("")
@@ -176,7 +183,7 @@ export async function main(denops: Denops): Promise<void> {
     async init(apikey: string, model: string, base_url: string): Promise<void> {
       key = apikey
       globalModel = model
-//      url = base_url
+      url = base_url
     },
 
     async setModel(model: string): Promise<void>{

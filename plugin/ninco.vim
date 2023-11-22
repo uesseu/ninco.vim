@@ -28,7 +28,8 @@ function! GetVisualSelection()
 endfunction
 
 
-function! NincoEnableWindow(key, model, url="https://api.openai.com/v1/chat/completions", vertical=0)
+function! NincoEnableWindow(key, model='gpt-3.5-turbo',
+	\url="https://api.openai.com/v1/chat/completions", vertical=0)
   call denops#request("ninco.vim", "init", [a:key, a:model, a:url])
   let g:ninco#winid = bufwinid(g:ninco#async_cmd_win)
   let g:async_cmd_win = g:ninco#async_cmd_win
@@ -133,12 +134,8 @@ function! NincoReset()
   call denops#request('ninco.vim', 'reset', [])
 endfunction
 
-function! NincoSetModel(model)
-  call denops#request('ninco.vim', 'setModel', [a:model])
-endfunction
-
 function! NincoEnableFunctions()
-  echo "This is old function and will be removed."
+  echo "This old function and will be removed. Please read README.md"
   let g:ninco#async_cmd_win = g:async_cmd_win
 
 
