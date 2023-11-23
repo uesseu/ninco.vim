@@ -61,7 +61,7 @@ call NincoEnableWindow([API_KEY],
     \"https://api.openai.com/v1/chat/completions"
     \0)
 ```
-If last argument is 0, horizontal window is used. If it is 1, vertical one is used.
+If last argument is 0, window is divided horizontally. If it is 1, vertical one is used.
 The functions has default argument and if you do not want to configure,
 only API_KEY is needed.
 
