@@ -1,5 +1,5 @@
 # What is this?
-ChatGPT client for vim and neovim written in typescript by denops.
+ChatGPT compatible client for vim and neovim written in typescript by denops.
 
 It is still under developping and destructive change may be done.
 It is just for my daily life, work and hobby.
@@ -11,6 +11,8 @@ However, I use it in daily life and it is useful for me. It can...
 - Ask a simple question
 - Ask a question of selected lines
 - Talk with chatgpt, compressing old data
+- Not only chatgpt of openai but also compatible servers
+- Ask using templates
 
 ![](sample.gif)
 
@@ -18,117 +20,113 @@ However, I use it in daily life and it is useful for me. It can...
 Vim or neovim, Denops and API key of openai is also needed.
 About library, it depends only on denops and so please see the requirements of denops.
 
-# Enabling chatgpt
-This code enables chatgpt. Arguments are...
-- API_KEY
-- Model
-- Whether split vertical or not
+# Ninco function
+At first, make template. Now, I make text file named 'temlpalte.md'.
 
-Default way of split is horizontal.
+```markdown
+Hello %s!
+```
+%s is variable. Of cource, multiple variables can be used.
+Then...
+
 ```vim
-call NincoEnableWindow([API_KEY], 'gpt-3.5-turbo', 0)
+:call Ninco("template.md", "world")
 ```
 
-If you do not want to split window, call it.
+This code sends openai 'Hello world!' and prints reply.
+If the first argument is blank string, no templates will be used and
+just second argument will be sent to openai.
+
+However, you must write vimrc to use it. ;-(
+Please read below.
+# Sample of vimrc
+If you want to use this plugin, at least, you should configure vimrc.
+
+If global variable named 'g:ninco#single_mode' is 0, log will be made and chatgpt looks remebmers your words.
 ```vim
-call NincoEnable('[API_KEY]', 'gpt-3.5-turbo')
+let g:ninco#single_mode = 1
 ```
 
+And then, you should call function to enable ninco.
+```vim
+call NincoEnable([API_KEY],
+    \'gpt-3.5-turbo',
+    \"https://api.openai.com/v1/chat/completions")
+```
+
+If you want to make new window, you can call this function.
+```vim
+call NincoEnableWindow([API_KEY],
+    \'gpt-3.5-turbo',
+    \"https://api.openai.com/v1/chat/completions"
+    \0)
+```
+If last argument is 0, window is divided horizontally. If it is 1, vertical one is used.
+The functions has default argument and if you do not want to configure,
+only API_KEY is needed.
+
+
+If you want to change the name of window, you can set this global variable.
+```vim
+let g:ninco#async_cmd_win = '__CHATGPT__'
+```
+
+Then, you can call Ninco function.
+
+```vim
+:call Ninco("", "hello!")
+```
+
+Is it so complex?
+# My vimrc example
+This is part of my vimrc.
+
+This codes enables...
+- Start Ninco by '\\c' or '\\d'
+- Compress talklog by 'gc'
+- Use Ninco by 'gn'
+
+```
+let g:ninco#single_mode = 1
+let g:api_key = "[API_KEY]"
+let g:ninco#gpt_model = "gpt-3.5-turbo"
+let g:ninco#gpt_url = "https://api.openai.com/v1/chat/completions"
+
+call NincoEnable(g:api_key, g:gpt_model, g:ninco#gpt_url)
+nnoremap <leader>d :call NincoEnableWindow(g:api_key, g:ninco#gpt_url)<CR>
+nnoremap <leader>c :call NincoEnable(g:api_key, g:ninco#gpt_url)<CR>
+
+" Compress log
+nnoremap gc :call NincoCompress(5)
+
+" Normal mode
+nnoremap gn :call Ninco("", "")<C-F>04f"<C-C>
+
+" Visual mode
+vnoremap gn :<C-E><C-U>call Ninco("", "", GetVisualSelection())<C-F>04f"<C-C>
+```
+
+# Openai compatible local server
+If you want to use openai compatible server on localhost,
+you need not use api_key and model. Just use blank string.
+And you should set url.
+```
+let g:ninco#gpt_url = "http://127.0.0.1:8000/v1/chat/completions"
+call NincoEnable('', '', g:ninco#gpt_url)
+```
+
+You can make compatible server by text-generation-webui.
+[https://github.com/oobabooga/text-generation-webui](https://github.com/oobabooga/text-generation-webui)
+Using this, you can use it in offline environment easily.
 
 # Model setting
 If you want to change model after enabling ninco, NincoSetModel may be useful.
+It may be only for openai.
 
 ```vim
 call NincoSetModel('gpt-3.5-turbo')
 ```
 
-# Preset of functions
-Since it is simple script, lowlevel usage is not very useful.
-And so, you can call a function to setup functions optionally.
-This may be good to use in daily life.
-
-This function enables optional functions.
-```vim
-call NincoEnableFunctions()
-```
-This function enables functions below.
-
-# Example of configure
-This vim script is part of my vimrc.
-You can open a new window and enable chatgpt by pushing "\d".
-If you do not want a new window, push "\d".
-Then, push "gn" and use the prompt without remembering talk log.
-This is the cheap way. I use it frequently and pay 0.05 dollar a day.
-Push "gm" and use the prompt if you want talk log.
-This is the expensive way.
-If you want to compress talk log, call NinCompress.
-
-```vim
-let g:async_cmd_win = '__CHATGPT__'
-let g:gpt_model = 'gpt-3.5-turbo'
-let g:api_key = "[Your API key]"
-call NincoEnableFunctions()
-
-nnoremap <leader>d :call NincoEnableWindow(g:api_key, g:gpt_model, 0)<CR>
-nnoremap <leader>c :call NincoEnable(g:api_key, g:gpt_model)<CR>
-nnoremap gn :call NincoSingle("")<left><left>
-vnoremap gn :<BS><BS><BS><BS><BS>call NincoSingleVisual("")<left><left>
-nnoremap gm :call NincoPut("")
-vnoremap gm :<BS><BS><BS><BS><BS>call NincoPutVisual("")<left><left>
-nnoremap gc :call NincoCompress(5)
-```
-
-
-## One question functions
-This function replies your question but remembers nothing.
-This function does not let you pay much money.
-```vim
-call NincoSingle(question)
-```
-
-This function reads the selected area and replies your question but remembers nothing.
-This function does not let you pay much money.
-```vim
-call NincoSingleVisual(question)
-```
-
-## Chat like questions functions
-This function replies your question and remembers nothing.
-This function may let you pay much money.
-And so, you should call NincoCompress function sometimes.
-```vim
-call NincoPut(order)
-```
-
-This function reads the selected area and replies your question, remembering all.
-This function may let you pay much money.
-I used 5 cents a day!
-```vim
-call NincoPutVisual(order)
-```
-
-This function removes log of the talk.
-It may be let you pay less money.
-```vim
-call NincoReset()
-```
-
-This function compresses history of the talk.
-The numerical argument represents the number you want to keep in talk log.
-```vim
-call NincoCompress(3)
-```
-
-ChatGPT has three roles. 'assistant', 'user' and 'system'.
-This function adds system.
-```vim
-call NincoPutSystem('Hellow')
-```
-
-Resets system.
-```vim
-call NincoResetSystem()
-```
-
+[legacy note](legacy_note.md)
 # License
 MIT.
