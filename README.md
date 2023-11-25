@@ -92,9 +92,8 @@ let g:api_key = "[API_KEY]"
 let g:ninco#gpt_model = "gpt-3.5-turbo"
 let g:ninco#gpt_url = "https://api.openai.com/v1/chat/completions"
 
-call NincoEnable(g:api_key, g:gpt_model, g:ninco#gpt_url)
-nnoremap <leader>d :call NincoEnableWindow(g:api_key, g:ninco#gpt_url)<CR>
-nnoremap <leader>c :call NincoEnable(g:api_key, g:ninco#gpt_url)<CR>
+nnoremap <leader>d :call NincoEnableWindow(g:api_key, g:ninco#gpt_model, g:ninco#gpt_url)<CR>
+nnoremap <leader>c :call NincoEnable(g:api_key, g:ninco#gpt_model, g:ninco#gpt_url)<CR>
 
 " Compress log
 nnoremap gc :call NincoCompress(5)
@@ -111,8 +110,10 @@ If you want to use openai compatible server on localhost,
 you need not use api_key and model. Just use blank string.
 And you should set url.
 ```
+let g:api_key = "[API_KEY]"
+let g:ninco#gpt_model = "gpt-3.5-turbo"
 let g:ninco#gpt_url = "http://127.0.0.1:8000/v1/chat/completions"
-call NincoEnable('', '', g:ninco#gpt_url)
+call NincoEnable(g:api_key, g:ninco#gpt_model, g:ninco#gpt_url)
 ```
 
 You can make compatible server by text-generation-webui.
