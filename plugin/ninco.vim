@@ -54,6 +54,7 @@ function! NincoEnable(key, model, url="https://api.openai.com/v1/chat/completion
 endfunction
 
 function! Ninco(template = "", ...)
+  call NincoPutEnter()
   if a:template != ""
     let s:order = join(readfile(a:template), "\n")
     for word in a:000
@@ -67,7 +68,6 @@ function! Ninco(template = "", ...)
       call NinPutWindow("# ")
       for word in split(s:order, "\n")
 	call NinPutWindow(word)
-	call NincoPutEnter()
       endfor
       call NinPutWindow("--------------------")
     endif
