@@ -194,14 +194,12 @@ export async function main(denops: Denops): Promise<void> {
       let letter = new Order()
       letter.putUser(order)
       chatgpt(denops, letter)
-        .then(x => execute(denops, `call NincoPutEnter()`))
     },
 
     async put(order, title = ''): Promise<void>{
       globalOrder.putUser(order)
       chatgpt(denops, globalOrder)
         .then(x => globalOrder.putAssistant(x))
-        .then(x => execute(denops, `call NincoPutEnter()`))
     },
 
     async compress(order): Promise<void>{
