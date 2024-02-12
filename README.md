@@ -129,5 +129,19 @@ call NincoSetModel('gpt-3.5-turbo')
 ```
 
 [legacy note](legacy_note.md)
+
+# Known issue
+It fails to display json.
+Perhaps, text processing is not adequate.
+
+# Trouble shooting
+## It never runs!
+Ninco depends on denops and denops depends on vim/neovim and deno.
+They are sensitive about version. If you did not upgrade, it may be a solution.
+
+## I cannot upgrade vim!
+Why do not you compile vim from source code?
+It may be a simple way for a geek. ;-)
+
 # License
 MIT.
