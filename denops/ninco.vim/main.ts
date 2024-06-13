@@ -124,7 +124,7 @@ function putString(denops: Denops, text: string){
   denops.eval("g:ninco#winid").then(x => {
     if (x == '-1'){
       text.split("\n").map(d =>{
-	d = d.replace(`\"`, `\\"`)
+	d = d.replace(`"`, `\\"`)
 	if(num !== 0) execute(denops, `norm o`)
 	execute(denops, `call NinPutWindow("${d}")`)
 	num++
@@ -132,7 +132,7 @@ function putString(denops: Denops, text: string){
     }
     else{
       text.split("\n").map(d =>{
-	d = d.replace(`\"`, `\\"`)
+	d = d.replace(`"`, `\\\\"`)
 	if(num !== 0) execute(denops, `call win_execute(g:ninco#winid, 'norm o')`)
 	execute(denops, `call NinPutWindow("${d}")`)
 	num++
@@ -155,17 +155,36 @@ async function chatgpt(denops: Denops, order: Order, print: bool = true){
     const data = new TextDecoder().decode(chunk)
       .split("\n\n")
       .map(x => {
-	console.log(x)
-        console.log(x.trim().slice(5, 10))
+	if (x.trim()[0] === "{"){
+	  try {
+	    return Array(JSON.parse(x.trim().slice(5))).filter(x => x !== "")
+	      .map(x => x["choices"][0]["delta"]["content"]).join("")
+	  } catch (er) {
+	    try{
+	      return JSON.parse(x)["error"]["message"]
+	    }
+	    catch {
+	      console.log(er)
+	    }
+	  }
+	}
         if (x.length === 0) return ""
         if (x.trim() === "data: [DONE]") return ""
         if (x.trim().slice(5, 10) === "error") {
-	  return JSON.parse(x)["error"]["message"]
+	  try{
+	    return JSON.parse(x)["error"]["message"]
+	  } catch (er) {
+	    console.log(er)
+	  }
 	}
         if (x.trim().slice(0, 8) === ": ping -") return ""
         if (x[0] !== "[") {
-	  return Array(JSON.parse(x.trim().slice(5))).filter(x => x !== "")
-            .map(x => x["choices"][0]["delta"]["content"]).join("")
+	  try {
+	    return Array(JSON.parse(x.trim().slice(5))).filter(x => x !== "")
+	      .map(x => x["choices"][0]["delta"]["content"]).join("")
+	  } catch (er) {
+	    return "[Error]"
+	  }
         }
       })
       if (print) putString(denops, data.join(""))
