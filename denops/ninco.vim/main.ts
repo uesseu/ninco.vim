@@ -1,5 +1,5 @@
 import { Denops } from "https://deno.land/x/denops_std@v1.0.0/mod.ts";
-import { execute } from "https://deno.land/x/denops_std@v1.0.0/helper/mod.ts";
+import { execute, call } from "https://deno.land/x/denops_std@v1.0.0/helper/mod.ts";
 
 let key = ""
 let globalModel = "gpt-3.5-turbo"
@@ -124,17 +124,18 @@ function putString(denops: Denops, text: string){
   denops.eval("g:ninco#winid").then(x => {
     if (x == '-1'){
       text.split("\n").map(d =>{
-	d = d.replace(`"`, `\\"`)
+	//d = d.replace(`"`, `\\"`)
 	if(num !== 0) execute(denops, `norm o`)
-	execute(denops, `call NinPutWindow("${d}")`)
+    execute(denops, 'NinPutWindow '+ d)
+	//execute(denops, `call NinPutWindow("${d}")`)
 	num++
       })
     }
     else{
       text.split("\n").map(d =>{
-	d = d.replace(`"`, `\\\\"`)
 	if(num !== 0) execute(denops, `call win_execute(g:ninco#winid, 'norm o')`)
-	execute(denops, `call NinPutWindow("${d}")`)
+    execute(denops, 'NinPutWindow '+ d)
+	//execute(denops, `call NinPutWindow("${d}")`)
 	num++
       })
     }
