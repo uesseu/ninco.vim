@@ -94,7 +94,7 @@ function! NinPutWindow(args) abort
   endif
 endfunction
 
-command! -nargs=1 NinPutWindow call NinPutWindow(<args>)
+command! -nargs=1 NinPutWindow call NinPutWindow(<f-args>)
 
 function! NincoPutEnter()
   if g:ninco#winid == -1
