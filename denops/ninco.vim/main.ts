@@ -124,19 +124,18 @@ function putString(denops: Denops, text: string){
   denops.eval("g:ninco#winid").then(x => {
     if (x == '-1'){
       text.split("\n").map(d =>{
-	//d = d.replace(`"`, `\\"`)
-	if(num !== 0) execute(denops, `norm o`)
-    execute(denops, 'NinPutWindow '+ d)
-	//execute(denops, `call NinPutWindow("${d}")`)
-	num++
+        if(num !== 0) execute(denops, `norm o`)
+        d = d.replaceAll(' ', '\\ ') + ';'
+        execute(denops, 'NinPutWindowDeno '+ d)
+        num++
       })
     }
     else{
       text.split("\n").map(d =>{
-	if(num !== 0) execute(denops, `call win_execute(g:ninco#winid, 'norm o')`)
-    execute(denops, 'NinPutWindow '+ d)
-	//execute(denops, `call NinPutWindow("${d}")`)
-	num++
+        if(num !== 0) execute(denops, `call win_execute(g:ninco#winid, 'norm o')`)
+        d = d.replaceAll(' ', '\\ ') + ';'
+        execute(denops, 'NinPutWindowDeno '+ d)
+        num++
       })
     }
   })

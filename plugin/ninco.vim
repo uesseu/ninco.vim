@@ -81,20 +81,40 @@ function! Ninco(template = "", ...)
 endfunction
 
 function! NinPutWindow(args) abort
+  let s:args = substitute(a:args, '\\ ', ' ', 'g')
   if g:ninco#winid == -1
     let cur_line = line('.')
-    call setline(cur_line, getline(cur_line) . a:args)
+    call setline(cur_line, getline(cur_line) . s:args)
     call execute('norm $')
   else
     call win_execute(g:ninco#winid, 'norm G')
     let hist = getbufline(g:ninco#async_cmd_win, '$')
-    let s:argstr = hist[-1] . a:args
+    let s:argstr = hist[-1] . s:args
     call setbufline(g:ninco#async_cmd_win, line('$', bufwinid(g:ninco#async_cmd_win)),  s:argstr)
     call win_execute(g:ninco#winid, 'norm $')
   endif
 endfunction
 
-command! -nargs=1 NinPutWindow call NinPutWindow(<f-args>)
+function! NinPutWindowDeno(args) abort
+  let s:args = substitute(a:args, '\\ ', ' ', 'g')
+  if strlen(s:args) == 1
+    return ''
+  endif
+  let s:args = s:args[:len(s:args) - 2]
+  if g:ninco#winid == -1
+    let cur_line = line('.')
+    call setline(cur_line, getline(cur_line) . s:args)
+    call execute('norm $')
+  else
+    call win_execute(g:ninco#winid, 'norm G')
+    let hist = getbufline(g:ninco#async_cmd_win, '$')
+    let s:argstr = hist[-1] . s:args
+    call setbufline(g:ninco#async_cmd_win, line('$', bufwinid(g:ninco#async_cmd_win)),  s:argstr)
+    call win_execute(g:ninco#winid, 'norm $')
+  endif
+endfunction
+
+command! -nargs=1 NinPutWindowDeno call NinPutWindowDeno(<f-args>)
 
 function! NincoPutEnter()
   if g:ninco#winid == -1
