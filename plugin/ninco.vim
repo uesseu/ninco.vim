@@ -9,7 +9,7 @@ if exists('g:loaded_ninco')
 endif
 let g:loaded_ninco = 1
 let g:ninco#winid = -1
-let g:ninco#single = 1
+let g:ninco#single = 0
 let g:ninco#async_cmd_win = '__CHATGPT__'
 
 let s:save_cpo = &cpo
@@ -56,17 +56,17 @@ endfunction
 function! Ninco(template = "", ...)
   call NincoPutEnter()
   if a:template != ""
-    let s:order = join(readfile(a:template), "\n")
+    let order = join(readfile(a:template), "\n")
     for word in a:000
-      let s:order = printf(s:order, word)
+      let order = printf(order, word)
     endfor
   else
-    let s:order = join(a:000, "\n")
+    let order = join(a:000, "\n")
   endif
   if g:ninco#single == 1
     if g:ninco#winid != -1
       call NinPutWindow("# ")
-      for word in split(s:order, "\n")
+      for word in split(order, "\n")
 	call NinPutWindow(word)
       endfor
       call NinPutWindow("--------------------")
@@ -74,42 +74,42 @@ function! Ninco(template = "", ...)
   endif
   call NincoPutEnter()
   if g:ninco#single == 1
-    call denops#request('ninco.vim', 'single', [s:order])
+    call denops#request('ninco.vim', 'single', [order])
   else
-    call denops#request('ninco.vim', 'put', [s:order])
+    call denops#request('ninco.vim', 'put', [order])
   endif
 endfunction
 
 function! NinPutWindow(args) abort
-  let s:args = substitute(a:args, '\\ ', ' ', 'g')
+  let args = substitute(a:args, '\\ ', ' ', 'g')
   if g:ninco#winid == -1
     let cur_line = line('.')
-    call setline(cur_line, getline(cur_line) . s:args)
+    call setline(cur_line, getline(cur_line) . args)
     call execute('norm $')
   else
     call win_execute(g:ninco#winid, 'norm G')
     let hist = getbufline(g:ninco#async_cmd_win, '$')
-    let s:argstr = hist[-1] . s:args
-    call setbufline(g:ninco#async_cmd_win, line('$', bufwinid(g:ninco#async_cmd_win)),  s:argstr)
+    let argstr = hist[-1] . args
+    call setbufline(g:ninco#async_cmd_win, line('$', bufwinid(g:ninco#async_cmd_win)),  argstr)
     call win_execute(g:ninco#winid, 'norm $')
   endif
 endfunction
 
 function! NinPutWindowDeno(args) abort
-  let s:args = substitute(a:args, '\\ ', ' ', 'g')
-  if strlen(s:args) == 1
+  let args = substitute(a:args, '\\ ', ' ', 'g')
+  if strlen(args) == 1
     return ''
   endif
-  let s:args = s:args[:len(s:args) - 2]
+  let args = args[:len(args) - 2]
   if g:ninco#winid == -1
     let cur_line = line('.')
-    call setline(cur_line, getline(cur_line) . s:args)
+    call setline(cur_line, getline(cur_line) . args)
     call execute('norm $')
   else
     call win_execute(g:ninco#winid, 'norm G')
     let hist = getbufline(g:ninco#async_cmd_win, '$')
-    let s:argstr = hist[-1] . s:args
-    call setbufline(g:ninco#async_cmd_win, line('$', bufwinid(g:ninco#async_cmd_win)),  s:argstr)
+    let argstr = hist[-1] . args
+    call setbufline(g:ninco#async_cmd_win, line('$', bufwinid(g:ninco#async_cmd_win)),  argstr)
     call win_execute(g:ninco#winid, 'norm $')
   endif
 endfunction
