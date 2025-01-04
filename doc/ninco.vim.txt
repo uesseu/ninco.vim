@@ -68,10 +68,30 @@ Configuration  	 	                    |ninco-configuration|
 
 If you want to use this plugin, at least, you should configure vimrc.
 
-g:ninco#single_mode                            |g:ninco#single_mode|
-If global variable named 'g:ninco#single_mode' is 0,
-log will be made and chatgpt looks remebmers your words. >
+g:ninco#single                            |g:ninco#single_mode|
+If global variable named 'g:ninco#single' is 1,
+log will be made and chatgpt looks remebmers your words.
+If global variable named 'g:ninco#single' is 0,
+log will not be made and the fee will be cheap.
+Default is 0.
+>
   let g:ninco#single = 1
+<
+
+g:ninco#max_log                                   |g:ninco#max_log|
+g:ninco#min_log                                   |g:ninco#max_log|
+
+If g:ninco#single is 1 and g:ninco#max_log is not 0,
+auto compress is enabled.
+
+If log is bigger than g:ninco#max_log, auto talk log compression
+is enabled. The size of talk log will be compressed to
+be g:ninco#min_log.
+Bellow is the default.
+
+ >
+  let g:ninco#max_log = 20
+  let g:ninco#min_log = 10
 <
 
 Enable ninco                                         |NincoEnable()|

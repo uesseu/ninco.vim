@@ -10,6 +10,9 @@ endif
 let g:loaded_ninco = 1
 let g:ninco#winid = -1
 let g:ninco#single = 0
+let g:ninco#max_log = 20
+let g:ninco#min_log = 10
+let g:ninco#_length = 0
 let g:ninco#async_cmd_win = '__CHATGPT__'
 
 let s:save_cpo = &cpo
@@ -54,6 +57,9 @@ function! NincoEnable(key, model, url="https://api.openai.com/v1/chat/completion
 endfunction
 
 function! Ninco(template = "", ...)
+  if g:ninco#single == 1 && g:ninco#max_log != 0
+    let g:ninco#_length = g:ninco#_length + 1
+  endif
   call NincoPutEnter()
   if a:template != ""
     let order = join(readfile(a:template), "\n")
@@ -77,6 +83,9 @@ function! Ninco(template = "", ...)
     call denops#request('ninco.vim', 'single', [order])
   else
     call denops#request('ninco.vim', 'put', [order])
+  endif
+  if g:ninco#max_log < g:ninco#_length && g:ninco#single == 1
+    call NincoCompress(g:ninco#min_log)
   endif
 endfunction
 
