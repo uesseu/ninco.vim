@@ -6,6 +6,10 @@ let globalModel = "gpt-3.5-turbo"
 let url = "https://api.openai.com/v1/chat/completions"
 //let url = "http://127.0.0.1:8000/v1/chat/completions"
 //let url = ''
+const command = new Deno.Command("ninvoice", {
+  stdin: "piped",
+});
+
 /**
  * A manager of order for chatGPT.
  * It can make JSON string to send to openai.
@@ -151,6 +155,8 @@ function putString(denops: Denops, text: string){
 async function chatgpt(denops: Denops, order: Order, print: bool = true){
   let resp = await order.getLetter()
   let allData = ""
+  const process = command.spawn();
+  const writer = process.stdin.getWriter();
   for await (const chunk of resp.body){
     const data = new TextDecoder().decode(chunk)
       .split("\n\n")
@@ -190,6 +196,9 @@ async function chatgpt(denops: Denops, order: Order, print: bool = true){
       if (print) putString(denops, data.join(""))
     allData += data.join("")
   }
+  writer.write(new TextEncoder().encode(allData))
+  writer.releaseLock();
+  await process.stdin.close();
   return allData
 }
 
