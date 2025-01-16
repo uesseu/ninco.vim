@@ -10,6 +10,8 @@ endif
 let g:loaded_ninco = 1
 let g:ninco#winid = -1
 let g:ninco#single = 0
+let g:ninco#command = ''
+let g:ninco#command_args = []
 let g:ninco#max_log = 20
 let g:ninco#min_log = 10
 let g:ninco#_length = 0
@@ -57,7 +59,7 @@ function! NincoEnable(key, model, url="https://api.openai.com/v1/chat/completion
 endfunction
 
 function! Ninco(template = "", ...)
-  if g:ninco#single == 1 && g:ninco#max_log != 0
+  if g:ninco#single == 0 && g:ninco#max_log != 0
     let g:ninco#_length = g:ninco#_length + 1
   endif
   call NincoPutEnter()
@@ -69,22 +71,23 @@ function! Ninco(template = "", ...)
   else
     let order = join(a:000, "\n")
   endif
-  if g:ninco#single == 1
-    if g:ninco#winid != -1
-      call NinPutWindow("# ")
-      for word in split(order, "\n")
-	call NinPutWindow(word)
-      endfor
-      call NinPutWindow("--------------------")
-    endif
+  if g:ninco#winid != -1
+    call NinPutWindow("# ")
+    for word in split(order, "\n")
+  call NinPutWindow(word)
+    endfor
+    call NincoPutEnter()
+    call NinPutWindow("--------------------")
   endif
   call NincoPutEnter()
   if g:ninco#single == 1
-    call denops#request('ninco.vim', 'single', [order])
+    call denops#request('ninco.vim', 'single',
+          \[order, g:ninco#command, g:ninco#command_args])
   else
-    call denops#request('ninco.vim', 'put', [order])
+    call denops#request('ninco.vim', 'put',
+          \[order, g:ninco#command, g:ninco#command_args])
   endif
-  if g:ninco#max_log < g:ninco#_length && g:ninco#single == 1
+  if g:ninco#max_log < g:ninco#_length && g:ninco#single == 0
     call NincoCompress(g:ninco#min_log)
   endif
 endfunction

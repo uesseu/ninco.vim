@@ -6,9 +6,6 @@ let globalModel = "gpt-3.5-turbo"
 let url = "https://api.openai.com/v1/chat/completions"
 //let url = "http://127.0.0.1:8000/v1/chat/completions"
 //let url = ''
-const command = new Deno.Command("ninvoice", {
-  stdin: "piped",
-});
 
 /**
  * A manager of order for chatGPT.
@@ -152,11 +149,20 @@ function putString(denops: Denops, text: string){
  * @param {bool} bool - If it is true, it put string to vim.
  * @returns {null} - All output of chatGPT.
  */
-async function chatgpt(denops: Denops, order: Order, print: bool = true){
+async function chatgpt(denops: Denops, order: Order, print: bool = true,
+                      command="", args=[]){
   let resp = await order.getLetter()
   let allData = ""
-  const process = command.spawn();
-  const writer = process.stdin.getWriter();
+  let process = null
+  let writer = null
+  if (command !== ""){
+    process = new Deno.Command(command, {
+      args: args,
+      stdin: "piped",
+    }).spawn();
+    writer = process.stdin.getWriter();
+  }
+
   for await (const chunk of resp.body){
     const data = new TextDecoder().decode(chunk)
       .split("\n\n")
@@ -174,17 +180,17 @@ async function chatgpt(denops: Denops, order: Order, print: bool = true){
 	    }
 	  }
 	}
-        if (x.length === 0) return ""
-        if (x.trim() === "data: [DONE]") return ""
-        if (x.trim().slice(5, 10) === "error") {
+    if (x.length === 0) return ""
+    if (x.trim() === "data: [DONE]") return ""
+    if (x.trim().slice(5, 10) === "error") {
 	  try{
 	    return JSON.parse(x)["error"]["message"]
 	  } catch (er) {
 	    console.log(er)
 	  }
 	}
-        if (x.trim().slice(0, 8) === ": ping -") return ""
-        if (x[0] !== "[") {
+    if (x.trim().slice(0, 8) === ": ping -") return ""
+    if (x[0] !== "[") {
 	  try {
 	    return Array(JSON.parse(x.trim().slice(5))).filter(x => x !== "")
 	      .map(x => x["choices"][0]["delta"]["content"]).join("")
@@ -193,12 +199,14 @@ async function chatgpt(denops: Denops, order: Order, print: bool = true){
 	  }
         }
       })
-      if (print) putString(denops, data.join(""))
+    if (print) putString(denops, data.join(""))
+    if (command !== "") writer.write(new TextEncoder().encode(data.join('')))
     allData += data.join("")
   }
-  writer.write(new TextEncoder().encode(allData))
-  writer.releaseLock();
-  await process.stdin.close();
+  if (command !== ""){
+    writer.releaseLock();
+    await process.stdin.close();
+  }
   return allData
 }
 
@@ -214,19 +222,15 @@ export async function main(denops: Denops): Promise<void> {
       url = base_url
     },
 
-    async setModel(model: string): Promise<void>{
-      globalModel = model
-    },
-
-    async single(order, title = ''): Promise<void> {
+    async single(order, command='', args=[]): Promise<void> {
       let letter = new Order()
       letter.putUser(order)
-      chatgpt(denops, letter)
+      chatgpt(denops, letter, true, command, args)
     },
 
-    async put(order, title = ''): Promise<void>{
+    async put(order, command='', args=[]): Promise<void>{
       globalOrder.putUser(order)
-      chatgpt(denops, globalOrder)
+      chatgpt(denops, globalOrder, true, command, args=[])
         .then(x => globalOrder.putAssistant(x))
     },
 
