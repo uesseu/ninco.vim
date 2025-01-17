@@ -168,47 +168,6 @@ function! NincoReset()
   call denops#request('ninco.vim', 'reset', [])
 endfunction
 
-function! NincoEnableFunctions()
-  echo "This old function and will be removed. Please read README.md"
-  let g:ninco#async_cmd_win = g:async_cmd_win
-
-
-  function! NincoSingle(order)
-    if g:ninco#winid != -1
-      call NinPutWindow("# " . a:order)
-    endif
-    call NincoPutEnter()
-    call denops#request('ninco.vim', 'single', [a:order])
-  endfunction
-
-  function! NincoSingleVisual(order)
-    if g:ninco#winid != -1
-      call NinPutWindow("# " . a:order)
-    else
-      call setpos('.', [0, getpos("'>")[1], 0, 0])
-    endif
-    call NincoPutEnter()
-    call denops#request('ninco.vim', 'single', [a:order . "\n" . GetVisualSelection()])
-  endfunction
-
-  function! NincoPut(order)
-    if g:ninco#winid != -1
-      call NinPutWindow("# " . a:order)
-    endif
-    call NincoPutEnter()
-    call denops#request('ninco.vim', 'put', [a:order])
-  endfunction
-
-  function! NincoPutVisual(order)
-    call setpos('.', [0, getpos("'>")[1], 0, 0])
-    if g:ninco#winid != -1
-      call NinPutWindow("# " . a:order)
-    endif
-    call NincoPutEnter()
-    call denops#request('ninco.vim', 'put', [a:order . "\n" . GetVisualSelection()])
-  endfunction
-
-endfunction
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
