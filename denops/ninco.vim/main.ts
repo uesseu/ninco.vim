@@ -63,7 +63,7 @@ class Order{
    * @param {string} content - Content of message.
    * @returns {null} - It returns null.
    */
-  putHistory(content: string){
+  unshiftHistory(content: string){
     this.messages.unshift({role: "user", content: content})
   }
 
@@ -239,7 +239,7 @@ export async function main(denops: Denops): Promise<void> {
       execute(denops, `call NincoPutEnter()`)
       const history: object = {"role": "user",
 		   "content": order + globalOrder.removeOld(order)}
-      chatgpt(denops, globalOrder, false).then(x => globalOrder.putHistory(x))
+      chatgpt(denops, globalOrder, false).then(x => globalOrder.unshiftHistory(x))
     },
 
     async reset(): Promise<void>{
