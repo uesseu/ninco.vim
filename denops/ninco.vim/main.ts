@@ -15,6 +15,14 @@ class Order{
   body
   messages: Array<object>
   system: Array<object>
+  single: boolean
+  command: string
+  command_arg: Array<string>
+  name: string
+  print: boolean
+  model: string
+  url: string
+  key: string
 
   /**
    * Setup order object to make JSON to send to openai.
@@ -24,10 +32,33 @@ class Order{
     this.messages = []
     this.system = []
     this.body = {
-	model: model,
-	messages: [],
-	stream: true,
+      model: model,
+      messages: [],
+      stream: true,
     }
+    this.single = true
+    this.print = true
+    this.command = ''
+    this.name = ''
+    this.model = ''
+    this.url = 'https://api.openai.com/v1/chat/completions'
+    this.key = 'gpt-3.5-turbo'
+    this.command_arg = []
+  }
+
+  /**
+   * Set parameter from json.
+   * @param {object} param - Content of parameter.
+   */
+  put_parameter(param: Order){
+    this.single = param.single          
+    this.print = param.print          
+    this.command = param.command          
+    this.name = param.name          
+    this.model = param.model          
+    this.url = param.url          
+    this.key = param.key          
+    this.command_arg = param.command_arg          
   }
 
   /**
@@ -149,6 +180,76 @@ function putString(denops: Denops, text: string){
  * @param {bool} bool - If it is true, it put string to vim.
  * @returns {null} - All output of chatGPT.
  */
+async function chatgpt2(
+  denops: Denops, order: Order
+){
+  let resp = await order.getLetter()
+  let allData = ""
+  let process = null
+  let writer = null
+  if (order.command !== ""){
+    process = new Deno.Command(order.command, {
+      args: order.args,
+      stdin: "piped",
+    }).spawn();
+    writer = process.stdin.getWriter();
+  }
+
+  for await (const chunk of resp.body){
+    const data = new TextDecoder().decode(chunk)
+      .split("\n\n")
+      .map(x => {
+	if (x.trim()[0] === "{"){
+	  try {
+	    return Array(JSON.parse(x.trim().slice(5))).filter(x => x !== "")
+	      .map(x => x["choices"][0]["delta"]["content"]).join("")
+	  } catch (er) {
+	    try{
+	      return JSON.parse(x)["error"]["message"]
+	    }
+	    catch {
+	      console.log(er)
+	    }
+	  }
+	}
+    if (x.length === 0) return ""
+    if (x.trim() === "data: [DONE]") return ""
+    if (x.trim().slice(5, 10) === "error") {
+	  try{
+	    return JSON.parse(x)["error"]["message"]
+	  } catch (er) {
+	    console.log(er)
+	  }
+	}
+    if (x.trim().slice(0, 8) === ": ping -") return ""
+    if (x[0] !== "[") {
+	  try {
+	    return Array(JSON.parse(x.trim().slice(5))).filter(x => x !== "")
+	      .map(x => x["choices"][0]["delta"]["content"]).join("")
+	  } catch (er) {
+	    return "[Error]"
+	  }
+        }
+      })
+    if (order.print) putString(denops, data.join(""))
+    if (order.command !== "")
+      writer.write(new TextEncoder().encode(data.join('')))
+    allData += data.join("")
+  }
+  if (order.command !== ""){
+    writer.releaseLock();
+    await process.stdin.close();
+  }
+  return allData
+}
+
+/**
+ * Receive reply from chatgpt and put it to vim window by denops.
+ * @param {Denops} denops - Denops object.
+ * @param {Order} order - Order object to use.
+ * @param {bool} bool - If it is true, it put string to vim.
+ * @returns {null} - All output of chatGPT.
+ */
 async function chatgpt(denops: Denops, order: Order, print: bool = true,
                       command="", args=[]){
   let resp = await order.getLetter()
@@ -212,6 +313,7 @@ async function chatgpt(denops: Denops, order: Order, print: bool = true,
 
 /* Global object to talk with chatGPT. */
 let globalOrder = new Order()
+let globalOrders = Array()
 
 export async function main(denops: Denops): Promise<void> {
   denops.dispatcher = {
@@ -220,6 +322,14 @@ export async function main(denops: Denops): Promise<void> {
       key = apikey
       globalModel = model
       url = base_url
+    },
+
+    async order(order){
+      if(!order.name in globalOrders) globalOrders[name] = new Order()
+      let letter = globalOrders[order.name]
+      letter.setConfig(order)
+      chatgpt2(denops, letter)
+        .then(x => letter.putAssistant(x))
     },
 
     async single(order, command='', args=[]): Promise<void> {

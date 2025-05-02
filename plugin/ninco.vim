@@ -7,18 +7,51 @@ scriptencoding utf-8
 if exists('g:loaded_ninco')
   finish
 endif
-let g:loaded_ninco = 1
-let g:ninco#winid = -1
-let g:ninco#single = 0
-let g:ninco#command = ''
-let g:ninco#command_args = []
-let g:ninco#max_log = 20
-let g:ninco#min_log = 10
-let g:ninco#_length = 0
-let g:ninco#async_cmd_win = '__CHATGPT__'
-
 let s:save_cpo = &cpo
 set cpo&vim
+
+let g:loaded_ninco = 1
+
+if !exists('g:ninco#single')
+  let g:ninco#single = 0
+endif
+if !exists('g:ninco#winid')
+  let g:ninco#winid = -1
+endif
+if !exists('g:ninco#command')
+  let g:ninco#command = ''
+endif
+if !exists('g:ninco#command_args')
+  let g:ninco#command_args = []
+endif
+if !exists('g:ninco#max_log')
+  let g:ninco#max_log = 20
+endif
+if !exists('g:ninco#min_log')
+  let g:ninco#min_log = 10
+endif
+if !exists('g:ninco#_length')
+  let g:ninco#_length = 0
+endif
+if !exists('g:ninco#async_cmd_win')
+  let g:ninco#async_cmd_win = '__CHATGPT__'
+endif
+
+function! NincoNew(name)
+  return #{name: a:name,
+        \single: 1,
+        \max_log: 20,
+        \min_log: 10,
+        \length: 0,
+        \win: '__CHATGPT__',
+        \command: '',
+        \command_args: [],
+        \win_id: -1
+        \}
+endfunction
+
+function! NincoRun()
+endfunction
 
 function! GetVisualSelection()
   let [line_start, column_start] = getpos("'<")[1:2]
