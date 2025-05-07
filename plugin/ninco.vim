@@ -68,7 +68,7 @@ endfunction
 
 function! NincoEnableWindow(key, model='gpt-3.5-turbo',
 	\url="https://api.openai.com/v1/chat/completions", vertical=0)
-  call denops#request("ninco.vim", "init", [a:key, a:model, a:url])
+  call denops#request("ninco", "init", [a:key, a:model, a:url])
   let g:ninco#winid = bufwinid(g:ninco#async_cmd_win)
   let g:async_cmd_win = g:ninco#async_cmd_win
   let result_pool = []
@@ -87,7 +87,7 @@ function! NincoEnableWindow(key, model='gpt-3.5-turbo',
 endfunction
 
 function! NincoEnable(key, model, url="https://api.openai.com/v1/chat/completions")
-  call denops#request("ninco.vim", "init", [a:key, a:model, a:url])
+  call denops#request("ninco", "init", [a:key, a:model, a:url])
   let g:ninco#winid = -1
 endfunction
 
@@ -114,10 +114,10 @@ function! Ninco(template = "", ...)
   endif
   call NincoPutEnter()
   if g:ninco#single == 1
-    call denops#request('ninco.vim', 'single',
+    call denops#request('ninco', 'single',
           \[order, g:ninco#command, g:ninco#command_args])
   else
-    call denops#request('ninco.vim', 'put',
+    call denops#request('ninco', 'put',
           \[order, g:ninco#command, g:ninco#command_args])
   endif
   if g:ninco#max_log < g:ninco#_length && g:ninco#single == 0
@@ -174,7 +174,7 @@ function! NincoCompress(num)
     call NinPutWindow("### Compress ###")
   endif
   call NincoPutEnter()
-  call denops#request('ninco.vim', 'compress', [a:num, 'Please summaryze these messages.'])
+  call denops#request('ninco', 'compress', [a:num, 'Please summaryze these messages.'])
 endfunction
 
 function! NincoResetSystem(order)
@@ -182,7 +182,7 @@ function! NincoResetSystem(order)
     call NinPutWindow("### ResetSystem ###")
   endif
   call NincoPutEnter()
-  call denops#request('ninco.vim', 'resetSystem', [a:order])
+  call denops#request('ninco', 'resetSystem', [a:order])
 endfunction
 
 function! NincoPutSystem(order)
@@ -190,7 +190,7 @@ function! NincoPutSystem(order)
     call NinPutWindow("# " . a:order)
   endif
   call NincoPutEnter()
-  call denops#request('ninco.vim', 'putSystem', [a:order])
+  call denops#request('ninco', 'putSystem', [a:order])
 endfunction
 
 function! NincoReset()
@@ -198,7 +198,7 @@ function! NincoReset()
     call NinPutWindow("### Reset ###")
   endif
   call NincoPutEnter()
-  call denops#request('ninco.vim', 'reset', [])
+  call denops#request('ninco', 'reset', [])
 endfunction
 
 
